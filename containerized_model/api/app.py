@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Oct  8 20:27:39 2018
 
-@author: akxay
-"""
 from sklearn.externals import joblib
 import numpy as np
 import pandas as pd
@@ -15,26 +11,24 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
- return "Hoilaaaaaaaaa!"
-
+ return "Hola amigos!"
 
 @app.route('/predict', methods=['POST'])
 def apicall():
-    """API Call
+    """Receives a JSON containing a list of elements and returns a predicion for each. 
+       Mandatory features: sepal_length, sepal_width, petal_length, petal_width
     """
     try:
-        test_json = request.get_json()
+        # Parse JSON 
+        json = request.get_json()
         val = []
-        print(test_json)
-        for dic in test_json:
-           row = []
-           row.append(dic['sepal_length'])
-           row.append(dic['sepal_width'])
-           row.append(dic['petal_length'])
-           row.append(dic['petal_width'])
-           val.append(row)
-        #load model
+        print(json)
+        for dic in json:
+           val.append([dic['sepal_length'], dic['sepal_width'], dic['petal_length'], dic['petal_width']])
+
         print(np.array(val))
+
+        # Load model and get prediction
         loaded_model = joblib.load('model/iris_svm_model.pkl')
         y_pred = loaded_model.predict(np.array(val))
         pred_dict = {}
@@ -43,7 +37,7 @@ def apicall():
         responses = jsonify(predictions=pred_dict)
         responses.status_code = 200
     except Exception as e:
-        responses = jsonify(predictions={'error':'some error occured, please try again later'})
+        responses = jsonify(predictions={'error':'some error occured, please verify request'})
         responses.status_code = 404
         print ('error', e)
     return (responses)

@@ -9,7 +9,11 @@ WORKDIR /home/project/app
 COPY requirements.txt /home/project/app
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy contents from your local to your docker container
-COPY . /home/project/app
-COPY ./model /home/project/app/model
+# train and create the model
+COPY iris_svm_train.py /home/project/app
+RUN mkdir model && python /home/project/app/iris_svm_train.py
 
+# copy app from your local to your docker container
+COPY app.py /home/project/app
+
+#CMD gunicorn -w 1 -b :8000 app:app
